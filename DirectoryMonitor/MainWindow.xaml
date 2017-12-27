@@ -5,8 +5,71 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DirectoryMonitor"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Directory Monitor" Height="450" Width="525">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="B2V" />
+    </Window.Resources>
     <Grid>
-        
+        <Grid.Background>
+            <ImageBrush Stretch="Uniform" ImageSource="Resources/Images/our-products-featured-image.jpg" Opacity="0.1" />
+        </Grid.Background>
+        <DockPanel Margin="5 5 5 5" LastChildFill="True">
+            <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontWeight="Bold" Content="Konfiguracja monitora" />
+            <StackPanel DockPanel.Dock="Right">
+                <Label Content="Aktualny status usługi" />
+                <Label HorizontalAlignment="Right" Foreground="Red" FontWeight="Light" Content="Wyłączona" />
+                <Label HorizontalAlignment="Right" VerticalAlignment="Bottom" Foreground="Red" FontWeight="Light" Content="2017, WETI PG" />
+            </StackPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="100" />
+                    <RowDefinition Height="75" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <GroupBox Header="Rodzaj obserwacji">
+                    <StackPanel Margin="5 5 0 0">
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type RadioButton}">
+                                <Setter Property="Margin" Value="0, 5, 0, 0" />
+                            </Style>
+                        </StackPanel.Resources>
+                        <RadioButton GroupName="WatcherMode">
+                            <StackPanel Margin="0, -5, 0, 0" Orientation="Horizontal">
+                                <Image Width="16px" Height="16px" Source="Resources/Images/txt-file-icon-1196.png" />
+                                <Label Content="Monitorowanie pliku" />
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton GroupName="WatcherMode">
+                            <StackPanel Margin="0, -5, 0, 0" Orientation="Horizontal">
+                                <Image Width="16px" Height="16px"
+                                       Source="Resources/Images/directory-icon-png-12382.png" />
+                                <Label Content="Monitorowanie katalogu" />
+                            </StackPanel>
+                        </RadioButton>
+                        <CheckBox HorizontalAlignment="Right" Content="Uwzględnianie podkatalogów" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Grid.Row="1" Header="Obserwowane zdarzenia">
+                    <Grid Margin="0, 5, 0, 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <CheckBox Content="Utworzenie" />
+                        <CheckBox Grid.Column="1" Grid.Row="0" Content="Modyfikacja" />
+                        <CheckBox Grid.Column="0" Grid.Row="1" Content="Usunięcie" />
+                        <CheckBox Grid.Column="1" Grid.Row="1" Content="Zmiana nazwy" />
+                    </Grid>
+                </GroupBox>
+                <DockPanel Grid.Row="2">
+                    <Label DockPanel.Dock="Top" Content="Dziennik zdarzeń"/>
+                    <TextBox DockPanel.Dock="Bottom"></TextBox>
+                </DockPanel>
+            </Grid>
+        </DockPanel>
     </Grid>
 </Window>
