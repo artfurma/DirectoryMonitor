@@ -16,14 +16,48 @@
         <DockPanel Margin="5 5 5 5" LastChildFill="True">
             <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontWeight="Bold" Content="Konfiguracja monitora" />
             <StackPanel DockPanel.Dock="Right">
+                <StackPanel.Resources>
+                    <ImageBrush x:Key="StartImageBrush" ImageSource="Resources/Images/Start-icon.png" />
+                    <ImageBrush x:Key="StopImageBrush" ImageSource="Resources/Images/Stop-red-icon.png" />
+                    <ImageBrush x:Key="PauseImageBrush" ImageSource="Resources/Images/Pause-icon.png" />
+                    <ImageBrush x:Key="ExportImageBrush" ImageSource="Resources/Images/export-icon.png" />
+                    <ImageBrush x:Key="SaveImageBrush" ImageSource="Resources/Images/Save-icon.png" />
+                </StackPanel.Resources>
+                <Grid Height="24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button BorderBrush="Transparent" Width="24" x:Name="StartServiceButton"
+                            Background="{StaticResource StartImageBrush}" Height="24" Margin="9,0"
+                            VerticalAlignment="Top" Click="StartServiceButton_Click" />
+                    <Button Grid.Column="1" BorderBrush="Transparent" Width="24" x:Name="PauseServiceButton"
+                            Background="{StaticResource PauseImageBrush}" Click="PauseServiceButton_Click" />
+                    <Button Grid.Column="2" BorderBrush="Transparent" Width="24" x:Name="StopServiceButton"
+                            Background="{StaticResource StopImageBrush}" Click="StopServiceButton_Click" />
+                </Grid>
                 <Label Content="Aktualny status usługi" />
                 <Label HorizontalAlignment="Right" Foreground="Red" FontWeight="Light" Content="Wyłączona" />
-                <Label HorizontalAlignment="Right" VerticalAlignment="Bottom" Foreground="Red" FontWeight="Light" Content="2017, WETI PG" />
+                <Label HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="9" FontWeight="Light"
+                       Content="2017, WETI PG" />
+                <Grid Height="24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button BorderBrush="Transparent" Width="24" x:Name="SaveChangesButton"
+                            Background="{StaticResource SaveImageBrush}" Height="24" Margin="20,0,19,0"
+                            VerticalAlignment="Bottom" Click="SaveChangesButton_Click" />
+                    <Button Grid.Column="1" BorderBrush="Transparent" Width="24" x:Name="ExportLogButton"
+                            Background="{StaticResource ExportImageBrush}" Click="ExportLogButton_Click" />
+                </Grid>
             </StackPanel>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="100" />
                     <RowDefinition Height="75" />
+                    <RowDefinition Height="50" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <GroupBox Header="Rodzaj obserwacji">
@@ -39,14 +73,14 @@
                                 <Label Content="Monitorowanie pliku" />
                             </StackPanel>
                         </RadioButton>
-                        <RadioButton GroupName="WatcherMode">
+                        <RadioButton GroupName="WatcherMode" IsChecked="True">
                             <StackPanel Margin="0, -5, 0, 0" Orientation="Horizontal">
                                 <Image Width="16px" Height="16px"
                                        Source="Resources/Images/directory-icon-png-12382.png" />
                                 <Label Content="Monitorowanie katalogu" />
                             </StackPanel>
                         </RadioButton>
-                        <CheckBox HorizontalAlignment="Right" Content="Uwzględnianie podkatalogów" />
+                        <CheckBox HorizontalAlignment="Right" Content="Uwzględnianie podkatalogów" IsChecked="True"/>
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Grid.Row="1" Header="Obserwowane zdarzenia">
@@ -59,15 +93,27 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <CheckBox Content="Utworzenie" />
-                        <CheckBox Grid.Column="1" Grid.Row="0" Content="Modyfikacja" />
-                        <CheckBox Grid.Column="0" Grid.Row="1" Content="Usunięcie" />
+                        <CheckBox Content="Utworzenie" IsChecked="True" />
+                        <CheckBox Grid.Column="1" Grid.Row="0" Content="Modyfikacja" IsChecked="True"/>
+                        <CheckBox Grid.Column="0" Grid.Row="1" Content="Usunięcie" IsChecked="True" />
                         <CheckBox Grid.Column="1" Grid.Row="1" Content="Zmiana nazwy" />
                     </Grid>
                 </GroupBox>
                 <DockPanel Grid.Row="2">
-                    <Label DockPanel.Dock="Top" Content="Dziennik zdarzeń"/>
-                    <TextBox DockPanel.Dock="Bottom"></TextBox>
+                    <DockPanel.Resources>
+                        <ImageBrush x:Key="BrowseImageBrush" ImageSource="Resources/Images/browser.png" />
+                    </DockPanel.Resources>
+                    <Label DockPanel.Dock="Top" Content="Ścieżka do pliku/katalogu" />
+                    <DockPanel>
+                        <TextBox x:Name="PathTextBox" DockPanel.Dock="Left" Width="325" IsReadOnly="True"/>
+                        <Button x:Name="BrowseDirectoryButton" DockPanel.Dock="Right" Height="24" Width="24"
+                                Background="{StaticResource BrowseImageBrush}" BorderBrush="Transparent"
+                                Click="BrowseDirectoryButton_Click" />
+                    </DockPanel>
+                </DockPanel>
+                <DockPanel Grid.Row="3">
+                    <Label DockPanel.Dock="Top" Content="Dziennik zdarzeń" />
+                    <TextBox DockPanel.Dock="Bottom" />
                 </DockPanel>
             </Grid>
         </DockPanel>
