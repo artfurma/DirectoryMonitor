@@ -1,174 +1,223 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
-using System.Linq;
+using System.IO;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
+using System.Windows.Forms;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using DirectoryMonitor.Services;
+using WatcherLibs;
+using MessageBox = System.Windows.MessageBox;
+using ServiceControllerStatus = System.ServiceProcess.ServiceControllerStatus;
 
 namespace DirectoryMonitor
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
-    {
-        private ServiceBase _serviceToRun;
-        private ServiceController _serviceController;
+	/// <summary>
+	/// Interaction logic for MainWindow.xaml
+	/// </summary>
+	public partial class MainWindow : Window
+	{
+		private ServiceController _serviceController;
+		private string _configPath;
 
-        public MainWindow()
-        {
-            InitializeComponent();
-            ReadAllSettings(); // tylko w celu sprawdzenia ustawień
-            _serviceToRun = new WatcherService {ServiceName = "planetwatcherservice"};
-            _serviceController = new ServiceController {ServiceName = "planetwatcherservice"};
-            PathTextBox.Text = "Wybierz ścieżkę...";
-        }
+		public MainWindow()
+		{
+			InitializeComponent();
+			_serviceController = new ServiceController {ServiceName = "PLANET File Watcher Service"};
+			Init();
+		}
 
-        private void ReadAllSettings()
-        {
-            try
-            {
-                var appSettings = ConfigurationManager.AppSettings;
+		private void Init()
+		{
+			PathTextBox.Text = "Wybierz ścieżkę...";
 
-                if (appSettings.Count == 0)
-                {
-                    Console.WriteLine(@"Brak ustawień");
-                }
-                else
-                {
-                    foreach (var key in appSettings.AllKeys)
-                    {
-                        Debug.WriteLine($"Key: {key}, Value: {appSettings[key]}");
-                    }
-                }
-            }
-            catch (ConfigurationErrorsException)
-            {
-                Console.WriteLine(@"Wystąpił błąd podczas odczytywania ustawień");
-            }
-        }
+			switch (_serviceController.Status)
+			{
+				case ServiceControllerStatus.Running:
+					ServiceStatusLabel.Content = "Usługa uruchomiona";
+					ServiceStatusLabel.Foreground = new SolidColorBrush(Colors.Green);
+					break;
+				case ServiceControllerStatus.Paused:
+					ServiceStatusLabel.Content = "Usługa wstrzymana";
+					ServiceStatusLabel.Foreground = new SolidColorBrush(Colors.Blue);
+					break;
+				case ServiceControllerStatus.Stopped:
+					ServiceStatusLabel.Content = "Usługa zatrzymana";
+					ServiceStatusLabel.Foreground = new SolidColorBrush(Colors.Red);
+					break;
+			}
+			GetSettingsFromConfig();
+		}
 
-        private string GetSetting(string key)
-        {
-            try
-            {
-                var appSettings = ConfigurationManager.AppSettings;
-                var result = appSettings[key] ?? "Nie znaleziono";
-                return result;
-            }
-            catch (ConfigurationErrorsException e)
-            {
-                Debug.WriteLine(e);
-                throw;
-            }
-        }
+		private void GetSettingsFromConfig()
+		{
+			var projectDir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent?.FullName;
+			var serviceExePath = Directory.GetParent(projectDir).FullName + "\\WatcherService\\bin\\Debug\\WatcherService.exe";
+			_configPath = serviceExePath;
 
-        private void AddUpdateSetting(string key, string value)
-        {
-            try
-            {
-                var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                var settings = configFile.AppSettings.Settings;
-                if (settings[key] == null)
-                {
-                    settings.Add(key, value);
-                }
-                else
-                {
-                    settings[key].Value = value;
-                }
+			var path = AppSettingsHelper.GetExternalSetting(serviceExePath, "Path");
+			var filter = AppSettingsHelper.GetExternalSetting(serviceExePath, "Filter");
+			var subdirs = AppSettingsHelper.GetExternalSetting(serviceExePath, "SubDirs");
+			var create = AppSettingsHelper.GetExternalSetting(serviceExePath, "Create");
+			var edit = AppSettingsHelper.GetExternalSetting(serviceExePath, "Edit");
+			var delete = AppSettingsHelper.GetExternalSetting(serviceExePath, "Delete");
+			var rename = AppSettingsHelper.GetExternalSetting(serviceExePath, "Rename");
+			var error = AppSettingsHelper.GetExternalSetting(serviceExePath, "Error");
 
-                configFile.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
-            }
-            catch (ConfigurationErrorsException e)
-            {
-                Debug.WriteLine(e);
-                throw;
-            }
-        }
+			if (path != "Setting not found")
+			{
+				PathTextBox.Text = path;
+			}
 
-        private void StartServiceButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_serviceController.Status == ServiceControllerStatus.Running ||
-                _serviceController.Status == ServiceControllerStatus.StartPending)
-            {
-                MessageBox.Show("Serwis już działa");
-                return;
-            }
+			if (filter != "Setting not found")
+			{
+				FilterTextBox.Text = filter;
+			}
 
-            try
-            {
-//                ServiceBase.Run(_serviceToRun);
+			if (subdirs != "Setting not found")
+			{
+				IncludeSubdirsCheckBox.IsChecked = bool.Parse(subdirs);
+			}
 
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
-                throw;
-            }
-        }
+			if (create != "Setting not found")
+			{
+				CreateCheckBox.IsChecked = bool.Parse(create);
+			}
 
-        private void PauseServiceButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_serviceController.Status == ServiceControllerStatus.Paused ||
-                _serviceController.Status == ServiceControllerStatus.PausePending)
-            {
-                MessageBox.Show("Serwis już spauzowany");
-                return;
-            }
+			if (edit != "Setting not found")
+			{
+				EditCheckBox.IsChecked = bool.Parse(edit);
+			}
 
-            try
-            {
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
-                throw;
-            }
-        }
+			if (delete != "Setting not found")
+			{
+				DeleteCheckBox.IsChecked = bool.Parse(delete);
+			}
 
-        private void StopServiceButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_serviceController.Status == ServiceControllerStatus.Stopped ||
-                _serviceController.Status == ServiceControllerStatus.StopPending)
-            {
-                MessageBox.Show("Serwis już jest zatrzymany");
-                return;
-            }
+			if (rename != "Setting not found")
+			{
+				RenameCheckBox.IsChecked = bool.Parse(rename);
+			}
 
-            try
-            {
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
-                throw;
-            }
-        }
+			if (error != "Setting not found")
+			{
+				ErrorCheckBox.IsChecked = bool.Parse(error);
+			}
+		}
 
-        private void ExportLogButton_Click(object sender, RoutedEventArgs e)
-        {
-        }
+		private void StartServiceButton_Click(object sender, RoutedEventArgs e)
+		{
+			if (_serviceController.Status == ServiceControllerStatus.Running ||
+			    _serviceController.Status == ServiceControllerStatus.StartPending)
+			{
+				MessageBox.Show("Serwis już działa");
+				return;
+			}
+			try
+			{
+				_serviceController.Start();
+				_serviceController.WaitForStatus(ServiceControllerStatus.Running);
 
-        private void SaveChangesButton_Click(object sender, RoutedEventArgs e)
-        {
-        }
+				if (_serviceController.Status == ServiceControllerStatus.Running)
+				{
+					ServiceStatusLabel.Content = "Usługa uruchomiona";
+					ServiceStatusLabel.Foreground = new SolidColorBrush(Colors.Green);
+				}
+			}
+			catch (Exception exception)
+			{
+				MessageBox.Show(exception.ToString());
+				throw;
+			}
+		}
 
-        private void BrowseDirectoryButton_Click(object sender, RoutedEventArgs e)
-        {
-        }
-    }
+		private void PauseServiceButton_Click(object sender, RoutedEventArgs e)
+		{
+			if (_serviceController.Status == ServiceControllerStatus.Paused ||
+			    _serviceController.Status == ServiceControllerStatus.PausePending)
+			{
+				MessageBox.Show("Usługa jest już zatrzymana");
+				return;
+			}
+			try
+			{
+				_serviceController.Pause();
+				_serviceController.WaitForStatus(ServiceControllerStatus.Paused);
+				if (_serviceController.Status == ServiceControllerStatus.Paused)
+				{
+					ServiceStatusLabel.Content = "Usługa wstrzymana";
+					ServiceStatusLabel.Foreground = new SolidColorBrush(Colors.Blue);
+				}
+			}
+			catch (Exception exception)
+			{
+				MessageBox.Show(exception.ToString());
+				throw;
+			}
+		}
+
+		private void StopServiceButton_Click(object sender, RoutedEventArgs e)
+		{
+			if (_serviceController.Status == ServiceControllerStatus.Stopped ||
+			    _serviceController.Status == ServiceControllerStatus.StopPending)
+			{
+				MessageBox.Show("Usługa jest już wyłączona");
+				return;
+			}
+
+			try
+			{
+				_serviceController.Stop();
+				_serviceController.WaitForStatus(ServiceControllerStatus.Stopped);
+
+				if (_serviceController.Status == ServiceControllerStatus.Stopped)
+				{
+					ServiceStatusLabel.Content = "Usługa zatrzymana";
+					ServiceStatusLabel.Foreground = new SolidColorBrush(Colors.Red);
+				}
+			}
+			catch (Exception exception)
+			{
+				MessageBox.Show(exception.ToString());
+				throw;
+			}
+		}
+
+		private void BrowseDirectoryButton_Click(object sender, RoutedEventArgs e)
+		{
+			using (var folderDialog = new FolderBrowserDialog())
+			{
+				if (folderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+				{
+					PathTextBox.Text = folderDialog.SelectedPath;
+				}
+			}
+		}
+
+		private void SaveConfigButton_Click(object sender, RoutedEventArgs e)
+		{
+			AppSettingsHelper.AddUpdateExternalSetting(_configPath, "Path", PathTextBox.Text);
+			AppSettingsHelper.AddUpdateExternalSetting(_configPath, "Filter", FilterTextBox.Text);
+
+			AppSettingsHelper.AddUpdateExternalSetting(_configPath, "Create",
+				CreateCheckBox.IsChecked == true ? "True" : "False");
+
+			AppSettingsHelper.AddUpdateExternalSetting(_configPath, "Edit",
+				EditCheckBox.IsChecked == true ? "True" : "False");
+
+			AppSettingsHelper.AddUpdateExternalSetting(_configPath, "Delete",
+				DeleteCheckBox.IsChecked == true ? "True" : "False");
+
+			AppSettingsHelper.AddUpdateExternalSetting(_configPath, "Rename",
+				RenameCheckBox.IsChecked == true ? "True" : "False");
+
+			AppSettingsHelper.AddUpdateExternalSetting(_configPath, "SubDirs",
+				IncludeSubdirsCheckBox.IsChecked == true ? "True" : "False");
+
+			AppSettingsHelper.AddUpdateExternalSetting(_configPath, "Error",
+				ErrorCheckBox.IsChecked == true ? "True" : "False");
+
+			MessageBox.Show("Zmiany zostały zapisane");
+		}
+	}
 }

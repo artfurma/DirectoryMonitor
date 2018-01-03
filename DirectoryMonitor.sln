@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectoryMonitor", "DirectoryMonitor\DirectoryMonitor.csproj", "{053760F2-E9EE-43C3-906A-203850396E4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WatcherService", "WatcherService\WatcherService.csproj", "{9E1D7152-AF0C-4966-AA44-24937D3BDE8E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WatcherLibs", "WatcherLibs\WatcherLibs.csproj", "{B5DA3AAE-4536-4761-AAE0-3B946BD86D1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{053760F2-E9EE-43C3-906A-203850396E4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{053760F2-E9EE-43C3-906A-203850396E4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{053760F2-E9EE-43C3-906A-203850396E4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E1D7152-AF0C-4966-AA44-24937D3BDE8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E1D7152-AF0C-4966-AA44-24937D3BDE8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E1D7152-AF0C-4966-AA44-24937D3BDE8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E1D7152-AF0C-4966-AA44-24937D3BDE8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5DA3AAE-4536-4761-AAE0-3B946BD86D1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5DA3AAE-4536-4761-AAE0-3B946BD86D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5DA3AAE-4536-4761-AAE0-3B946BD86D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5DA3AAE-4536-4761-AAE0-3B946BD86D1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

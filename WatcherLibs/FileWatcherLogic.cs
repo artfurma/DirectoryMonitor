@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Dynamic;
 using System.IO;
 
-namespace DirectoryMonitor.Libs
+namespace WatcherLibs
 {
-	public static class WatcherLib
+	public static class FileWatcherLogic
 	{
 		private static readonly log4net.ILog Log =
 			log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		public static void StartMonitoring()
 		{
-			ConfigureWatcher();
+			log4net.Config.XmlConfigurator.Configure();
 			Log.Info("Rozpoczęto monitorowanie");
 		}
 
@@ -19,36 +20,37 @@ namespace DirectoryMonitor.Libs
 			Log.Info("Zakończono monitorowanie");
 		}
 
-		private static void ConfigureWatcher()
+		public static void ConfigureWatcher(string path, string filter, string subdirs, bool create, bool edit, bool delete,
+			bool rename, bool error)
 		{
 			var watcher = new FileSystemWatcher
 			{
-				Path = AppSettingsHelper.GetSetting("Path"),
-				Filter = AppSettingsHelper.GetSetting("Filter")
+				Path = path,
+				Filter = filter,
+				NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
+				               | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+				IncludeSubdirectories = bool.Parse(subdirs)
 			};
 
-			if (watcher.Path == "Setting not found")
-			{
-				AppSettingsHelper.AddUpdateSetting("Path", AppDomain.CurrentDomain.BaseDirectory);
-			}
-
-
-			if (watcher.Filter == "Setting not found")
-			{
-				AppSettingsHelper.AddUpdateSetting("Filter", "*.*");
-			}
-
-			watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
-			                       | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-
 			// Event handlers
-			watcher.Changed += OnChanged;
-			watcher.Created += OnCreated;
-			watcher.Deleted += OnDeleted;
-			watcher.Renamed += OnRenamed;
+			if (edit)
+				watcher.Changed += OnChanged;
+			if (create)
+				watcher.Created += OnCreated;
+			if (delete)
+				watcher.Deleted += OnDeleted;
+			if (rename)
+				watcher.Renamed += OnRenamed;
+			if (error)
+				watcher.Error += OnError;
 
 			// Begin watching
 			watcher.EnableRaisingEvents = true;
+		}
+
+		private static void OnError(object sender, ErrorEventArgs e)
+		{
+			Log.Error($"{DateTime.Now:MMM ddd d HH:mm yyyy} Wystąpił błąd: {e.GetException()}");
 		}
 
 		private static void OnRenamed(object sender, RenamedEventArgs renamedEventArgs)
@@ -59,7 +61,7 @@ namespace DirectoryMonitor.Libs
 
 		private static void OnDeleted(object sender, FileSystemEventArgs fileSystemEventArgs)
 		{
-			Log.Error($"{DateTime.Now:MMM ddd d HH:mm yyyy} Usunięto plik: {fileSystemEventArgs.FullPath}");
+			Log.Warn($"{DateTime.Now:MMM ddd d HH:mm yyyy} Usunięto plik: {fileSystemEventArgs.FullPath}");
 		}
 
 		private static void OnCreated(object sender, FileSystemEventArgs fileSystemEventArgs)
